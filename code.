@@ -1,0 +1,95 @@
+#include <iostream>
+#include <conio.h>
+#include <windows.h>
+
+using namespace std;
+
+// Function to set the cursor position
+void gotoxy(int x, int y) {
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+int main() {
+    const int width = 40;
+    const int height = 20;
+
+    int playerX = width / 2;
+    int playerY = height - 1;
+    int bulletX = -1;
+    int bulletY = -1;
+    int score = 0;
+
+    bool isFired = false;
+    bool isGameOver = false;
+
+    while (!isGameOver) {
+        // Displaying the game screen
+        system("cls");
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                if (y == playerY && x == playerX)
+                    cout << "^";  // Player
+                else if (y == bulletY && x == bulletX)
+                    cout << "*";  // Bullet
+                else if (y == height - 1)
+                    cout << "-";  // Ground
+                else
+                    cout << " ";  // Empty space
+            }
+            cout << endl;
+        }
+        cout << "Score: " << score << endl;
+
+        // Player movement
+        if (_kbhit()) {
+            char key = _getch();
+            switch (key) {
+                case 'a':
+                    playerX = max(playerX - 1, 0);
+                    break;
+                case 'd':
+                    playerX = min(playerX + 1, width - 1);
+                    break;
+                case ' ':
+                    if (!isFired) {
+                        bulletX = playerX;
+                        bulletY = playerY - 1;
+                        isFired = true;
+                    }
+                    break;
+                case 'q':
+                    isGameOver = true;
+                    break;
+            }
+        }
+
+        // Bullet movement
+        if (isFired) {
+            bulletY--;
+            if (bulletY < 0)
+                isFired = false;
+        }
+
+        // Collision detection
+        if (bulletY == 0) {
+            if (bulletX == playerX) {
+                score++;
+                isFired = false;
+            } else {
+                isGameOver = true;
+            }
+        }
+
+        Sleep(50);  // Delay to control game speed
+    }
+
+    // Game over
+    system("cls");
+    cout << "Game Over!" << endl;
+    cout << "Your score: " << score << endl;
+
+    return 0;
+}
